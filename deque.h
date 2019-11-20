@@ -158,8 +158,6 @@ namespace coen79_lab8
     };
     
     
-    
-    
     // ------------------------------------------------------------------------------
     // IMPLEMENTATION
     // ------------------------------------------------------------------------------
@@ -222,7 +220,8 @@ namespace coen79_lab8
         // Create a new array of block pointers
         // STUDENT WORK...
 
-        
+		block_pointers = new value_type*[bp_array_size];
+
         
         // Copy the data blocks of "source" object
         for (size_type bp_array_index = 0; bp_array_index < source.bp_array_size; ++bp_array_index)
@@ -236,10 +235,16 @@ namespace coen79_lab8
             {
                 //If this is the first_bp of source, then set the first_bp of this deque
                 // STUDENT WORK...
-                
+				if (source.first_bp == source.block_pointers[bp_array_index]) {
+					first_bp = block_pointers[bp_array_index];
+				}
                 
                 //If this is the back_ptr of source, then set the back_ptr of this deque
                 // STUDENT WORK...
+
+				if (source.last_bp == source.block_pointers[bp_array_index]) {
+					last_bp = block_pointers[bp_array_index];
+				}
                 
                 
                 // Create a data block
@@ -250,6 +255,16 @@ namespace coen79_lab8
                 for (size_type block_item_index = 0; block_item_index < block_size; ++block_item_index)
                 {
                     // STUDENT WORK...
+					if (source.front_ptr == source.block_pointers[bp_array_index][block_item_index]) {
+						first_bp = block_pointers[bp_array_index][block_item_index];
+					}
+
+					if (source.back_ptr == source.block_pointers[bp_array_index][block_item_index]) {
+						back_bp = block_pointers[bp_array_index][block_item_index];
+					}
+
+					block_pointers[bp_array_index][block_item_index] = source.block_pointers[bp_array_index][block_item_index];
+
                 }
             }
         }
@@ -262,10 +277,14 @@ namespace coen79_lab8
         
         // Clear the data blocks
         // STUDENT WORK...
-        
+		for (valuetype i = first_bp; i <= last_bp; i++) {
+			free(i);
+		}
         
         // Clear the array of block pointers
         // STUDENT WORK...
+
+		delete[] block_pointers;
         
         
         first_bp = last_bp = block_pointers_end = block_pointers = NULL;
@@ -278,16 +297,18 @@ namespace coen79_lab8
         
         // Clear the data blocks
         // STUDENT WORK...
-        
+
+		for (size_type block_item_index = 0; block_item_index < block_size; ++block_item_index) {
+			block_pointers[bp_array_index][block_item_index] = NULL;
+		}
         
         first_bp = last_bp = NULL;
         front_ptr = back_ptr = NULL;
         
         // Note: The array of block pointers should not be deleted;
-        //       However, all of its entries are NULL because all the
-        //       data blocks have been deleted.
+        // However, all of its entries are NULL because all the data blocks have been deleted.
     }
-    
+	//Postcondition: All the entries of the deque are deleted.
     
     
     template <class Item>
@@ -344,13 +365,16 @@ namespace coen79_lab8
             last_bp = first_bp = block_pointers + bp_mid - 1;
             
             // STUDENT WORK...
+			block_pointers[bp_mid][0] = entry;
         }
         
-        // There is at least one empty slot before the entry that
-        // front_ptr points to (in the same data block)
+        // There is at least one empty slot before the entry that front_ptr points to (in the same data block)
         else if (front_ptr != *first_bp)
         {
             // STUDENT WORK...
+			while (front_ptr != NULL) {
+				
+			}
         }
         
         // Data block has no room left before front_ptr; however,
@@ -360,16 +384,17 @@ namespace coen79_lab8
         {
             // STUDENT WORK...
 
+
         }
         
-        // Data block has no room left before front_ptr;
-        // and the array of block pointers has no available slot before first_bp
+        // Data block has no room left before front_ptr; and the array of block pointers has no available slot before first_bp
         else if ((*first_bp == front_ptr) && (first_bp == block_pointers))
         {
             // STUDENT WORK...
 
         }
     }
+	//    Postcondition: Adds entry to the front of the deque
     
     
     template <class Item>
@@ -412,6 +437,7 @@ namespace coen79_lab8
 
         }
     }
+	//Postcondition: Adds entry to the back of the deque
     
     
     template <class Item>
@@ -424,6 +450,7 @@ namespace coen79_lab8
         {
             // STUDENT WORK...
 
+
         }
         // This is the last entry of the data block; move to the next block
         else if (front_ptr == ((*first_bp) + block_size - 1))
@@ -435,9 +462,11 @@ namespace coen79_lab8
         else
         {
             // STUDENT WORK...
+			
 
         }
     }
+	//Postcondition: Removes the front item of the deque
     
     
     template <class Item>
@@ -452,6 +481,9 @@ namespace coen79_lab8
         else if (back_ptr == *last_bp)
         {
             // STUDENT WORK...
+			delete[] back_ptr;
+			--last_bp;
+			back_ptr = (*last_bp) + (BLOCK_SIZE - 1);
 
         }
         else
@@ -459,6 +491,7 @@ namespace coen79_lab8
             --back_ptr;
         }
     }
+	//Postcondition: Removes the back item of the deque
     
     template <class Item>
     bool deque<Item>::isEmpty()

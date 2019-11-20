@@ -69,6 +69,7 @@ namespace coen79_lab8
         bool operator ==(const deque_iterator other) const
         {
             // STUDENT WORK...
+
             
         }
         
@@ -129,12 +130,14 @@ namespace coen79_lab8
             if (cursor == current_boundary)
             {
                 // STUDENT WORK...
+				cursor = 
 
             }
             // Move forward
             else
             {
                 // STUDENT WORK...
+
 
             }
             
