@@ -69,7 +69,34 @@ namespace coen79_lab8
         bool operator ==(const deque_iterator other) const
         {
             // STUDENT WORK...
+			if (bp_array_size != other.bp_array_size) {
+				return false;
+			}
 
+			if (block_size != other.block_size) {
+				return false;
+			}
+
+			//compare elements that iterators iterate through
+
+			for (size_type i = block_pointers; i != block_pointers_end; i++) {
+				//all spots that are null are null in both
+				if (block_pointers[i] == NULL) {
+					if (other.block_pointers[i] != NULL) {
+						return false;
+					}
+				} else {
+					//compare actual elements
+					for (size_type j = 0; j < block_size; j++) {
+						if (block_pointers[i][j] != other.block_pointers[i][j]) {
+							return false;
+						}
+					}
+				}
+				
+			}
+
+			return true;
             
         }
         
@@ -95,13 +122,16 @@ namespace coen79_lab8
             if (cursor == current_boundary)
             {
                 // STUDENT WORK...
+				++current_block_pointer;
+				current_boundary = *(current_block_pointer) + (block_size - 1);
+				cursor = *current_block_pointer;
 
             }
             // Move forward
             else
             {
                 // STUDENT WORK...
-
+				++cursor;
             }
             
             return *this;
@@ -130,14 +160,15 @@ namespace coen79_lab8
             if (cursor == current_boundary)
             {
                 // STUDENT WORK...
-				cursor = 
+				current_block_pointer++;
+				cursor = *current_block_pointer;
+				current_boundary = *(current_block_pointer) + (block_size - 1);
 
             }
             // Move forward
-            else
-            {
+            else {
                 // STUDENT WORK...
-
+				cursor++;
 
             }
             

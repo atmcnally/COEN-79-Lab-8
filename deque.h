@@ -186,7 +186,6 @@ namespace coen79_lab8
         front_ptr = back_ptr = NULL;
     }
     
-    
     //COPY CONSTRUCTOR
     template <class Item>
     deque<Item>::deque (const deque<Item>& source) {
@@ -199,7 +198,6 @@ namespace coen79_lab8
         // (must have been already implemented, you cannot rely on the compiler)
         *this = source;
     }
-    
     
     // ASSIGNMENT OPERATOR
     template <class Item>
@@ -246,7 +244,6 @@ namespace coen79_lab8
 					last_bp = block_pointers[bp_array_index];
 				}
                 
-                
                 // Create a data block
                 block_pointers[bp_array_index] = new value_type [block_size];
                 
@@ -270,15 +267,14 @@ namespace coen79_lab8
         }
     }
     
-    
     //DESTRUCTOR
     template <class Item>
     deque<Item>::~deque () {
         
         // Clear the data blocks
         // STUDENT WORK...
-		for (valuetype i = first_bp; i <= last_bp; i++) {
-			free(i);
+		for (valuetype** i = first_bp; i != last_bp; ++i) {
+			delete i;
 		}
         
         // Clear the array of block pointers
@@ -286,11 +282,9 @@ namespace coen79_lab8
 
 		delete[] block_pointers;
         
-        
         first_bp = last_bp = block_pointers_end = block_pointers = NULL;
         front_ptr = back_ptr = NULL;
     }
-    
     
     template <class Item>
     void deque<Item>::clear () {
@@ -298,8 +292,9 @@ namespace coen79_lab8
         // Clear the data blocks
         // STUDENT WORK...
 
-		for (size_type block_item_index = 0; block_item_index < block_size; ++block_item_index) {
-			block_pointers[bp_array_index][block_item_index] = NULL;
+		for (valuetype** i = first_bp; i < last_bp; ++i) {
+			delete *i;
+			i = NULL;
 		}
         
         first_bp = last_bp = NULL;
@@ -309,7 +304,6 @@ namespace coen79_lab8
         // However, all of its entries are NULL because all the data blocks have been deleted.
     }
 	//Postcondition: All the entries of the deque are deleted.
-    
     
     template <class Item>
     void deque<Item>::reserve()
@@ -350,7 +344,6 @@ namespace coen79_lab8
         last_bp = block_pointers + offsett_last_bp + 10;
     }
     
-    
     template <class Item>
     void deque<Item>::push_front(const value_type& entry)
     {
@@ -371,10 +364,8 @@ namespace coen79_lab8
         // There is at least one empty slot before the entry that front_ptr points to (in the same data block)
         else if (front_ptr != *first_bp)
         {
-            // STUDENT WORK...
-			while (front_ptr != NULL) {
-				
-			}
+			--front_ptr;
+			*front_ptr = entry;
         }
         
         // Data block has no room left before front_ptr; however,
@@ -383,7 +374,10 @@ namespace coen79_lab8
         else if ((*first_bp == front_ptr) && (first_bp != block_pointers))
         {
             // STUDENT WORK...
-
+			--first_ptr;
+			*first_bp = new value_type[block_size];
+			*(first_bp)[block_size - 1] = entry;
+			front_ptr = *(first_bp)+(block_size - 1);
 
         }
         
@@ -391,6 +385,11 @@ namespace coen79_lab8
         else if ((*first_bp == front_ptr) && (first_bp == block_pointers))
         {
             // STUDENT WORK...
+			reserve();
+			--first_bp;
+			*first_bp = new value_type[block_size];
+			*(first_bp)[block_size - 1] = entry;
+			front_ptr = *(first_bp)+(block_size - 1);
 
         }
     }
@@ -410,6 +409,12 @@ namespace coen79_lab8
 
             // STUDENT WORK...
 
+			*last_bp = new value_type[block_size];
+			**last_bp = entry;
+			//front, last, back are all the same
+			back_ptr = *last_bp;
+			front_ptr = back_ptr;
+
         }
         
         // There is at least one empty slot after the entry
@@ -417,7 +422,8 @@ namespace coen79_lab8
         else if (back_ptr != ((*last_bp) + (block_size - 1)))
         {
             // STUDENT WORK...
-
+			++back_ptr;
+			*back_ptr = entry;
         }
         
         // Data block has no room left after back_ptr;
@@ -426,6 +432,10 @@ namespace coen79_lab8
         else if ((back_ptr == ((*last_bp) + (block_size - 1))) && (last_bp != block_pointers_end))
         {
             // STUDENT WORK...
+			++last_bp;
+			*last_bp = new value_type[block_size];
+			*(last_bp)[0] = entry;
+			back_ptr = *last_bp;
 
         }
         
@@ -434,6 +444,11 @@ namespace coen79_lab8
         else if ((back_ptr == ((*last_bp) + (block_size - 1))) && (last_bp == block_pointers_end))
         {
             // STUDENT WORK...
+			reserve();
+			++last_bp;
+			*last_bp = new value_type[block_size];
+			*(last_bp)[0] = entry;
+			back_ptr = *last_bp;
 
         }
     }
@@ -445,29 +460,20 @@ namespace coen79_lab8
     {
         assert(!isEmpty());
         
-        // This is the only entry in the deque; remove it and delete the data block
-        if (back_ptr == front_ptr)
-        {
-            // STUDENT WORK...
+		if (back_ptr == front_ptr) {
+			clear();
+		} else if (front_ptr == ((*first_bp) + block_size - 1)) {
+			// This is the last entry of the data block; move to the next block
+			delete[] front_ptr;
+			++first_bp;
+			front_ptr = (*first_ptr);
 
+		} else {
+			++front_ptr;
+		}
 
-        }
-        // This is the last entry of the data block; move to the next block
-        else if (front_ptr == ((*first_bp) + block_size - 1))
-        {
-            // STUDENT WORK...
-
-        }
-        // Simply move the pointer
-        else
-        {
-            // STUDENT WORK...
-			
-
-        }
     }
 	//Postcondition: Removes the front item of the deque
-    
     
     template <class Item>
     void deque<Item>::pop_back()
@@ -516,7 +522,6 @@ namespace coen79_lab8
         return *front_ptr;
     }
     
-    
     // Constructs an itertor which points to the
     // first element of the deque
     template <class Item>
@@ -538,7 +543,6 @@ namespace coen79_lab8
                         bp_array_size, block_size,
                         tmp_cursor, tmp_current_boundary, tmp_current_block_pointer);
     }
-    
     
     // Constructs an itertor which points to the past the
     // last element of the deque
