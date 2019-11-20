@@ -205,22 +205,23 @@ namespace coen79_lab8
         
         // Invoke the clear() function
         clear();
+
+		// Copy the size variables from "source" object
+		bp_array_size = source.bp_array_size;
+		block_size = source.block_size;
         
         // Delete the array of block pointers
-        delete [] block_pointers;
+		if (block_pointers != NULL) {
+			delete[] block_pointers;
+		}
         block_pointers = NULL;
         block_pointers_end = NULL;
-        
-        // Copy the size variables from "source" object
-        bp_array_size = source.bp_array_size;
-        block_size = source.block_size;
         
         // Create a new array of block pointers
         // STUDENT WORK...
 
 		block_pointers = new value_type*[bp_array_size];
 
-        
         // Copy the data blocks of "source" object
         for (size_type bp_array_index = 0; bp_array_index < source.bp_array_size; ++bp_array_index)
         {
@@ -233,15 +234,15 @@ namespace coen79_lab8
             {
                 //If this is the first_bp of source, then set the first_bp of this deque
                 // STUDENT WORK...
-				if (source.first_bp == source.block_pointers[bp_array_index]) {
-					first_bp = block_pointers[bp_array_index];
+				if (source.first_bp == (source.block_pointers + bp_array_index)) {
+					first_bp = block_pointers + bp_array_index;
 				}
                 
                 //If this is the back_ptr of source, then set the back_ptr of this deque
                 // STUDENT WORK...
 
-				if (source.last_bp == source.block_pointers[bp_array_index]) {
-					last_bp = block_pointers[bp_array_index];
+				if (source.last_bp == (source.block_pointers + bp_array_index)) {
+					last_bp = block_pointers + bp_array_index;
 				}
                 
                 // Create a data block
@@ -252,15 +253,15 @@ namespace coen79_lab8
                 for (size_type block_item_index = 0; block_item_index < block_size; ++block_item_index)
                 {
                     // STUDENT WORK...
-					if (source.front_ptr == source.block_pointers[bp_array_index][block_item_index]) {
-						first_bp = block_pointers[bp_array_index][block_item_index];
+					if (source.front_ptr == source.block_pointers[bp_array_index] + block_item_index) {
+						front_ptr = block_pointers[bp_array_index] + block_item_index;
 					}
 
-					if (source.back_ptr == source.block_pointers[bp_array_index][block_item_index]) {
-						back_bp = block_pointers[bp_array_index][block_item_index];
+					if (source.back_ptr == source.block_pointers[bp_array_index] + block_item_index) {
+						back_ptr = block_pointers[bp_array_index] + block_item_index;
 					}
-
-					block_pointers[bp_array_index][block_item_index] = source.block_pointers[bp_array_index][block_item_index];
+					value_type tmp = source.block_pointers[bp_array_index][block_item_index];
+					block_pointers[bp_array_index][block_item_index] = tmp;
 
                 }
             }
@@ -273,14 +274,18 @@ namespace coen79_lab8
         
         // Clear the data blocks
         // STUDENT WORK...
-		for (valuetype** i = first_bp; i != last_bp; ++i) {
+		clear();
+
+		for (value_type** i = first_bp; i != last_bp; ++i) {
 			delete i;
 		}
         
         // Clear the array of block pointers
         // STUDENT WORK...
-
-		delete[] block_pointers;
+		if (block_pointers != NULL) {
+			delete[] block_pointers;
+		}
+		
         
         first_bp = last_bp = block_pointers_end = block_pointers = NULL;
         front_ptr = back_ptr = NULL;
@@ -292,9 +297,12 @@ namespace coen79_lab8
         // Clear the data blocks
         // STUDENT WORK...
 
-		for (valuetype** i = first_bp; i < last_bp; ++i) {
-			delete *i;
-			i = NULL;
+		for (size_type i = 0; i < bp_array_size; ++i) {
+			if (block_pointers[i] != NULL) {
+				delete [] block_pointers[i];
+				block_pointers[i] = NULL;
+			}
+
 		}
         
         first_bp = last_bp = NULL;
@@ -358,7 +366,10 @@ namespace coen79_lab8
             last_bp = first_bp = block_pointers + bp_mid - 1;
             
             // STUDENT WORK...
-			block_pointers[bp_mid][0] = entry;
+			*first_bp = new value_type[block_size];
+            **first_bp = entry;
+            back_ptr = *first_bp;
+            front_ptr = back_ptr;
         }
         
         // There is at least one empty slot before the entry that front_ptr points to (in the same data block)
@@ -374,10 +385,10 @@ namespace coen79_lab8
         else if ((*first_bp == front_ptr) && (first_bp != block_pointers))
         {
             // STUDENT WORK...
-			--first_ptr;
+			--first_bp;
 			*first_bp = new value_type[block_size];
-			*(first_bp)[block_size - 1] = entry;
-			front_ptr = *(first_bp)+(block_size - 1);
+			(*first_bp)[block_size - 1] = entry;
+			front_ptr = (*first_bp)+(block_size - 1);
 
         }
         
@@ -464,9 +475,9 @@ namespace coen79_lab8
 			clear();
 		} else if (front_ptr == ((*first_bp) + block_size - 1)) {
 			// This is the last entry of the data block; move to the next block
-			delete[] front_ptr;
+			
 			++first_bp;
-			front_ptr = (*first_ptr);
+			front_ptr = (*first_bp);
 
 		} else {
 			++front_ptr;

@@ -88,7 +88,7 @@ namespace coen79_lab8
 				} else {
 					//compare actual elements
 					for (size_type j = 0; j < block_size; j++) {
-						if (block_pointers[i][j] != other.block_pointers[i][j]) {
+						if (block_pointers[i] + j != other.block_pointers[i] + j) {
 							return false;
 						}
 					}
